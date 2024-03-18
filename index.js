@@ -11,6 +11,7 @@ const LocalStrategy = require("passport-local");
 
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
+const userRoutes = require("./routes/user");
 const User = require("./models/user");
 
 mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp")
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
+//session
 const sessionConfig ={
     secret: "thisshouldbeabettersecret",
     resave: false,
@@ -46,6 +48,7 @@ const sessionConfig ={
 app.use(session(sessionConfig));
 app.use(flash());
 
+//passport setup
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -53,14 +56,10 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//test
-app.get("/fakeUser", async(req, res)=>{
-    const user = new User({email: "colttt@gmail.com", username: "colttt"});
-    const newUser = await User.register(user, "chicken");
-    res.send(newUser);
-})
+
 //flash messages
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
@@ -69,6 +68,8 @@ app.use((req, res, next) => {
 //Router
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:campgroundId/reviews", reviewRoutes);
+app.use("/", userRoutes);
+
 
 app.get("/", (req, res) => {
     res.render("home");
