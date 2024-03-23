@@ -1,7 +1,7 @@
 <% layout("layouts/boilerplate") %>
     <h1 class="text-center">Edit Campground</h1>
     <div class="col-6 offset-3">
-        <form action="/campgrounds/<%=campground._id %>?_method=PUT" method="post" class="validated-form" novalidate>
+        <form action="/campgrounds/<%=campground._id %>?_method=PUT" method="post" class="validated-form" novalidate enctype="multipart/form-data">
             <div class="mb-2">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" class="form-control" name="campground[title]" id="title" required
@@ -14,14 +14,6 @@
                 <label for="location" class="form-label">Location</label>
                 <input type="text" class="form-control" name="campground[location]" id="location" required
                     value="<%=campground.location %>">
-                <div class="valid-feedback">
-                    Looks good!
-                </div>
-            </div>
-            <div class="mb-2">
-                <label for="image" class="form-label">Image Url</label>
-                <input type="text" class="form-control" name="campground[image]" id="image" required
-                    value="<%=campground.image %>">
                 <div class="valid-feedback">
                     Looks good!
                 </div>
@@ -44,6 +36,19 @@
                 <div class="valid-feedback">
                     Looks good!
                 </div>
+            </div>
+            <div class="mb-2">
+                <label for="image" class="form-label">Add Images</label>
+                <input type="file" class="form-control" id="image" name="image" multiple>
+            </div>
+            <div class="mb-2">
+                <% campground.images.forEach(function(img, i) { %>
+                    <img src="<%=img.thumbnail %>" class="img-thumbnail"  alt="">
+                    <div class="form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="deleteImages[]" id="image-<%=i %>" value="<%=img.filename %>">
+                        <label for="image-<%=i %>" class="form-check-label">Delete</label>    
+                    </div>
+                    <% }); %>
             </div>
             <div class="mb-2"><button class="btn btn-info">Update campground</button>
             </div>
