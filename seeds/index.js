@@ -1,7 +1,12 @@
+if(process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
 const mongoose = require("mongoose");
 const Campground = require("../models/campground");
 const cities = require("./cities");
 const {places, descriptors} = require("./seedHelpers");
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const geocoder = mbxGeocoding({accessToken: process.env.MAPBOX_TOKEN});
 
 mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp")
     .then(() => {
@@ -18,9 +23,15 @@ const seedDB = async () => {
     for(let i = 0; i < 50; ++i) {
         const random1000 = Math.floor(Math.random() * 1000);
         const campPrice = Math.floor(Math.random() * 20) + 10;
+        const locationString = `${cities[random1000].city}, ${cities[random1000].state}`;
+        const geoData = await geocoder.forwardGeocode({
+            query: locationString,
+            limit: 1
+        }).send();
         const camp = new Campground({
-            location: `${cities[random1000].city}, ${cities[random1000].state}`,
+            location: locationString,
             title: `${sample(descriptors)} ${sample(places)}`,
+            geometry: geoData.body.features[0].geometry,
             images: [
                 {
                   url: 'https://res.cloudinary.com/do06plons/image/upload/v1710883023/YelpCamp/qhnir7vfjkpzqnawubbt.jpg',
